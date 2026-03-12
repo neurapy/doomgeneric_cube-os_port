@@ -377,15 +377,13 @@ void P_MobjThinker(mobj_t *mobj)
 	if (mobj->momx || mobj->momy || (mobj->flags & MF_SKULLFLY)) {
 		P_XYMovement(mobj);
 
-		// FIXME: decent NOP/NULL/Nil function pointer please.
-		if (mobj->thinker.function.acv == (actionf_v)(-1))
+		if (P_ThinkerIsRemoved(&mobj->thinker))
 			return; // mobj was removed
 	}
 	if ((mobj->z != mobj->floorz) || mobj->momz) {
 		P_ZMovement(mobj);
 
-		// FIXME: decent NOP/NULL/Nil function pointer please.
-		if (mobj->thinker.function.acv == (actionf_v)(-1))
+		if (P_ThinkerIsRemoved(&mobj->thinker))
 			return; // mobj was removed
 	}
 

@@ -755,13 +755,13 @@ void M_VerifyNightmare(int key)
 	if (key != key_menu_confirm)
 		return;
 
-	G_DeferedInitNew(nightmare, epi + 1, 1);
+	G_DeferedInitNew(sk_nightmare, epi + 1, 1);
 	M_ClearMenus();
 }
 
 void M_ChooseSkill(int choice)
 {
-	if (choice == nightmare) {
+	if (choice == sk_nightmare) {
 		M_StartMessage(DEH_String(NIGHTMARE), M_VerifyNightmare, true);
 		return;
 	}
@@ -820,8 +820,7 @@ void M_Options(int choice)
 //
 void M_ChangeMessages(int choice)
 {
-	// warning: unused parameter `int choice'
-	choice	     = 0;
+	(void)choice;
 	showMessages = 1 - showMessages;
 
 	if (!showMessages)
@@ -847,7 +846,7 @@ void M_EndGameResponse(int key)
 
 void M_EndGame(int choice)
 {
-	choice = 0;
+	(void)choice;
 	if (!usergame) {
 		S_StartSound(NULL, sfx_oof);
 		return;
@@ -866,7 +865,7 @@ void M_EndGame(int choice)
 //
 void M_ReadThis(int choice)
 {
-	choice = 0;
+	(void)choice;
 	M_SetupNextMenu(&ReadDef1);
 }
 
@@ -876,7 +875,7 @@ void M_ReadThis2(int choice)
 	// All others had only one
 
 	if (gameversion <= exe_doom_1_9 && gamemode != commercial) {
-		choice = 0;
+		(void)choice;
 		M_SetupNextMenu(&ReadDef2);
 	} else {
 		// Close the menu
@@ -887,7 +886,7 @@ void M_ReadThis2(int choice)
 
 void M_FinishReadThis(int choice)
 {
-	choice = 0;
+	(void)choice;
 	M_SetupNextMenu(&MainDef);
 }
 
@@ -914,9 +913,9 @@ void M_QuitResponse(int key)
 	I_Quit();
 }
 
-static char *M_SelectEndMessage(void)
+static const char *M_SelectEndMessage(void)
 {
-	char **endmsg;
+	const char *const *endmsg;
 
 	if (logical_gamemission == doom) {
 		// Doom 1
@@ -954,7 +953,7 @@ void M_ChangeSensitivity(int choice)
 
 void M_ChangeDetail(int choice)
 {
-	choice	    = 0;
+	(void)choice;
 	detailLevel = 1 - detailLevel;
 
 	R_SetViewSize(screenblocks, detailLevel);

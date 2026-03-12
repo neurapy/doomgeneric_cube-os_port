@@ -682,16 +682,16 @@ vissprite_t vsprsortedhead;
 
 void R_SortVisSprites(void)
 {
-	int	     i;
-	int	     count;
-	vissprite_t *ds;
-	vissprite_t *best;
-	vissprite_t  unsorted;
-	fixed_t	     bestscale;
+	int		   i;
+	int		   count;
+	vissprite_t	  *ds;
+	vissprite_t	  *best;
+	static vissprite_t unsorted_head;
+	fixed_t		   bestscale;
 
 	count = vissprite_p - vissprites;
 
-	unsorted.next = unsorted.prev = &unsorted;
+	unsorted_head.next = unsorted_head.prev = &unsorted_head;
 
 	if (!count)
 		return;
@@ -701,18 +701,18 @@ void R_SortVisSprites(void)
 		ds->prev = ds - 1;
 	}
 
-	vissprites[0].prev	= &unsorted;
-	unsorted.next		= &vissprites[0];
-	(vissprite_p - 1)->next = &unsorted;
-	unsorted.prev		= vissprite_p - 1;
+	vissprites[0].prev	= &unsorted_head;
+	unsorted_head.next	= &vissprites[0];
+	(vissprite_p - 1)->next = &unsorted_head;
+	unsorted_head.prev	= vissprite_p - 1;
 
 	// pull the vissprites out by scale
 
 	vsprsortedhead.next = vsprsortedhead.prev = &vsprsortedhead;
 	for (i = 0; i < count; i++) {
 		bestscale = INT_MAX;
-		best	  = unsorted.next;
-		for (ds = unsorted.next; ds != &unsorted; ds = ds->next) {
+		best	  = unsorted_head.next;
+		for (ds = unsorted_head.next; ds != &unsorted_head; ds = ds->next) {
 			if (ds->scale < bestscale) {
 				bestscale = ds->scale;
 				best	  = ds;

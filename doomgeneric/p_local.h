@@ -65,6 +65,11 @@ void P_InitThinkers(void);
 void P_AddThinker(thinker_t *thinker);
 void P_RemoveThinker(thinker_t *thinker);
 
+static inline boolean P_ThinkerIsRemoved(const thinker_t *thinker)
+{
+	return thinker->function.acv == (actionf_v)(-1);
+}
+
 //
 // P_PSPR
 //

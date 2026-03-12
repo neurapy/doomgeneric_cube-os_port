@@ -18,8 +18,9 @@ BASE_CFLAGS := $(OPT_LEVEL) -ggdb -ffreestanding -ffunction-sections \
 	-fdata-sections -fno-unwind-tables -fno-asynchronous-unwind-tables $(ARCH_FLAGS) \
 	-Wall -Wextra -Wno-unused-parameter -Wno-sign-compare -Wno-pointer-sign
 CFLAGS += $(BASE_CFLAGS)
-DOOM_CFLAGS := -std=gnu23 $(BASE_CFLAGS)
-PORT_CFLAGS := -std=gnu23 $(BASE_CFLAGS)
+EXTRA_WARNINGS ?=
+DOOM_CFLAGS = -std=gnu23 $(BASE_CFLAGS) $(EXTRA_WARNINGS)
+PORT_CFLAGS = -std=gnu23 $(BASE_CFLAGS) $(EXTRA_WARNINGS)
 LDFLAGS += $(ARCH_FLAGS) -nostdlib -Wl,--gc-sections -Wl,--fatal-warnings
 LDLIBS += -lc -lm -lgcc
 
@@ -160,8 +161,11 @@ $(APP_IMAGE): $(OBJS) $(BUILD_CONFIG)
 	@mkdir -p $(dir $@)
 	$(CC) -o $@ $(OBJS) $(LDFLAGS) $(LDLIBS)
 
-.PHONY: FORCE build clean
+.PHONY: FORCE build clean strict
 build: $(APP_IMAGE)
+
+strict: EXTRA_WARNINGS += -Werror -Wcast-qual -Wwrite-strings -Wimplicit-fallthrough=5
+strict: build
 
 clean:
 	rm -rf $(BUILD_DIR)

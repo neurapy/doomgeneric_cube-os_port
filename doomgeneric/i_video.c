@@ -1,29 +1,3 @@
-// Emacs style mode select   -*- C++ -*-
-//-----------------------------------------------------------------------------
-//
-// $Id:$
-//
-// Copyright (C) 1993-1996 by id Software, Inc.
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// $Log:$
-//
-// DESCRIPTION:
-//	DOOM graphics stuff for X11, UNIX.
-//
-//-----------------------------------------------------------------------------
-
-static const char rcsid[] = "$Id: i_x.c,v 1.6 1997/02/03 22:45:10 b1 Exp $";
-
 #include "i_video.h"
 
 #include "config.h"
@@ -117,65 +91,31 @@ typedef struct {
 	byte b;
 } col_t;
 
-// Palette converted to RGB565
-
 static uint16_t rgb565_palette[256];
+static uint16_t fb16_palette[256];
+static uint32_t fb32_palette[256];
 
-void cmap_to_rgb565(uint16_t *out, uint8_t *in, int in_pixels)
+static void cmap_to_fb(uint8_t *out, const uint8_t *in, int in_pixels)
 {
-	int	     i, j;
-	struct color c;
-	uint16_t     r, g, b;
+	int i, k;
 
 	for (i = 0; i < in_pixels; i++) {
-		c    = colors[*in];
-		r    = ((uint16_t)(c.r >> 3)) << 11;
-		g    = ((uint16_t)(c.g >> 2)) << 5;
-		b    = ((uint16_t)(c.b >> 3)) << 0;
-		*out = (r | g | b);
-
-		in++;
-		for (j = 0; j < fb_scaling; j++) {
-			out++;
-		}
-	}
-}
-
-void cmap_to_fb(uint8_t *out, uint8_t *in, int in_pixels)
-{
-	int	     i, k;
-	struct color c;
-	uint32_t     pix;
-
-	for (i = 0; i < in_pixels; i++) {
-		c = colors[*in]; // R:8 G:8 B:8
-
 		if (s_Fb.bits_per_pixel == 16) {
-			// RGB565 packing
-			uint16_t p = ((c.r & 0xF8) << 8) | ((c.g & 0xFC) << 3) | (c.b >> 3);
-
-#ifdef SYS_BIG_ENDIAN
-			p = swapeLE16(p); // can't use SHORT() because this needs to stay unsigned
-#endif
+			uint16_t p = fb16_palette[*in];
 			for (k = 0; k < fb_scaling; k++) {
 				*(uint16_t *)out = p;
 				out += 2;
 			}
 		} else if (s_Fb.bits_per_pixel == 32) {
-			// Assuming RGBA8888
-			pix = (c.r << s_Fb.red.offset) | (c.g << s_Fb.green.offset) |
-			      (c.b << s_Fb.blue.offset);
-
-#ifdef SYS_BIG_ENDIAN
-			pix = swapLE32(pix);
-#endif
+			uint32_t pix = fb32_palette[*in];
 			for (k = 0; k < fb_scaling; k++) {
 				*(uint32_t *)out = pix;
 				out += 4;
 			}
 		} else {
 			// no clue how to convert this
-			I_Error("No idea how to convert %d bpp pixels", s_Fb.bits_per_pixel);
+			I_Error("No idea how to convert %lu bpp pixels",
+				(unsigned long)s_Fb.bits_per_pixel);
 		}
 
 		in++;
@@ -186,17 +126,16 @@ static void I_ConvertFrameBuffer(void)
 {
 	PERF_USCOPE();
 	int	       y;
-	int	       x_offset, y_offset, x_offset_end;
+	int	       x_offset, x_offset_end;
+	unsigned int   bytes_per_pixel;
 	unsigned char *line_in, *line_out;
 
 	/* Offsets in case FB is bigger than DOOM */
 	/* 600 = s_Fb heigt, 200 screenheight */
-	/* 600 = s_Fb heigt, 200 screenheight */
 	/* 2048 =s_Fb width, 320 screenwidth */
-	y_offset = (((s_Fb.yres - (SCREENHEIGHT * fb_scaling)) * s_Fb.bits_per_pixel / 8)) / 2;
-	x_offset = (((s_Fb.xres - (SCREENWIDTH * fb_scaling)) * s_Fb.bits_per_pixel / 8)) / 2;
-	x_offset_end =
-		((s_Fb.xres - (SCREENWIDTH * fb_scaling)) * s_Fb.bits_per_pixel / 8) - x_offset;
+	bytes_per_pixel = s_Fb.bits_per_pixel / 8;
+	x_offset	= (((s_Fb.xres - (SCREENWIDTH * fb_scaling)) * bytes_per_pixel)) / 2;
+	x_offset_end	= ((s_Fb.xres - (SCREENWIDTH * fb_scaling)) * bytes_per_pixel) - x_offset;
 
 	/* DRAW SCREEN */
 	line_in	 = (unsigned char *)I_VideoBuffer;
@@ -224,13 +163,10 @@ static void I_ConvertFrameBuffer(void)
 #else
 			cmap_to_fb((void *)line_out, (void *)line_in, SCREENWIDTH);
 #endif
-			line_out += (SCREENWIDTH * fb_scaling * (s_Fb.bits_per_pixel / 8)) +
-				    x_offset_end;
+			line_out += (SCREENWIDTH * fb_scaling * bytes_per_pixel) + x_offset_end;
 		}
 		line_in += SCREENWIDTH;
 	}
-
-	(void)y_offset;
 }
 
 void I_InitGraphics(void)
@@ -292,12 +228,17 @@ void I_InitGraphics(void)
 
 #endif // CMAP256
 
-	printf("I_InitGraphics: framebuffer: x_res: %d, y_res: %d, x_virtual: %d, y_virtual: %d, bpp: %d\n",
-	       s_Fb.xres, s_Fb.yres, s_Fb.xres_virtual, s_Fb.yres_virtual, s_Fb.bits_per_pixel);
+	printf("I_InitGraphics: framebuffer: x_res: %lu, y_res: %lu, x_virtual: %lu, "
+	       "y_virtual: %lu, bpp: %lu\n",
+	       (unsigned long)s_Fb.xres, (unsigned long)s_Fb.yres, (unsigned long)s_Fb.xres_virtual,
+	       (unsigned long)s_Fb.yres_virtual, (unsigned long)s_Fb.bits_per_pixel);
 
-	printf("I_InitGraphics: framebuffer: RGBA: %d%d%d%d, red_off: %d, green_off: %d, blue_off: %d, transp_off: %d\n",
-	       s_Fb.red.length, s_Fb.green.length, s_Fb.blue.length, s_Fb.transp.length,
-	       s_Fb.red.offset, s_Fb.green.offset, s_Fb.blue.offset, s_Fb.transp.offset);
+	printf("I_InitGraphics: framebuffer: RGBA: %lu%lu%lu%lu, red_off: %lu, green_off: %lu, "
+	       "blue_off: %lu, transp_off: %lu\n",
+	       (unsigned long)s_Fb.red.length, (unsigned long)s_Fb.green.length,
+	       (unsigned long)s_Fb.blue.length, (unsigned long)s_Fb.transp.length,
+	       (unsigned long)s_Fb.red.offset, (unsigned long)s_Fb.green.offset,
+	       (unsigned long)s_Fb.blue.offset, (unsigned long)s_Fb.transp.offset);
 
 	printf("I_InitGraphics: DOOM screen size: w x h: %d x %d\n", SCREENWIDTH, SCREENHEIGHT);
 
@@ -392,6 +333,17 @@ void I_SetPalette(byte *palette)
 		colors[i].r = gammatable[usegamma][*palette++];
 		colors[i].g = gammatable[usegamma][*palette++];
 		colors[i].b = gammatable[usegamma][*palette++];
+
+		rgb565_palette[i] = GFX_RGB565(colors[i].r, colors[i].g, colors[i].b);
+		fb16_palette[i]	  = rgb565_palette[i];
+		fb32_palette[i]	  = ((uint32_t)colors[i].r << s_Fb.red.offset) |
+				  ((uint32_t)colors[i].g << s_Fb.green.offset) |
+				  ((uint32_t)colors[i].b << s_Fb.blue.offset);
+
+#ifdef SYS_BIG_ENDIAN
+		fb16_palette[i] = swapeLE16(fb16_palette[i]);
+		fb32_palette[i] = swapLE32(fb32_palette[i]);
+#endif
 	}
 
 #ifdef CMAP256
@@ -408,8 +360,6 @@ int I_GetPaletteIndex(int r, int g, int b)
 	int   best, best_diff, diff;
 	int   i;
 	col_t color;
-
-	printf("I_GetPaletteIndex\n");
 
 	best	  = 0;
 	best_diff = INT_MAX;

@@ -550,7 +550,7 @@ void D_StartTitle(void)
 // These are from the original source: some of them are perhaps
 // not used in any dehacked patches
 
-static char *banners[] = {
+static const char *const banners[] = {
 	// doom2.wad
 	"                         "
 	"DOOM 2: Hell on Earth v%i.%i"
@@ -588,8 +588,8 @@ static char *banners[] = {
 
 static char *GetGameName(char *gamename)
 {
-	size_t i;
-	char  *deh_sub;
+	size_t	    i;
+	const char *deh_sub;
 
 	for (i = 0; i < arrlen(banners); ++i) {
 		// Has the banner been replaced?
@@ -782,7 +782,7 @@ static boolean D_AddFile(char *filename)
 // Some dehacked mods replace these.  These are only displayed if they are
 // replaced by dehacked.
 
-static char *copyright_banners[] = {
+static const char *const copyright_banners[] = {
 	"===========================================================================\n"
 	"ATTENTION:  This version of DOOM has been modified.  If you would like to\n"
 	"get a copy of the original game, call 1-800-IDGAMES or see the readme file.\n"
@@ -807,7 +807,7 @@ void PrintDehackedBanners(void)
 	size_t i;
 
 	for (i = 0; i < arrlen(copyright_banners); ++i) {
-		char *deh_s;
+		const char *deh_s;
 
 		deh_s = DEH_String(copyright_banners[i]);
 
@@ -1403,10 +1403,10 @@ void D_DoomMain(void)
 	if (modifiedgame) {
 		// These are the lumps that will be checked in IWAD,
 		// if any one is not present, execution will be aborted.
-		char name[23][8] = { "e2m1",   "e2m2",	 "e2m3",   "e2m4",   "e2m5",	"e2m6",
-				     "e2m7",   "e2m8",	 "e2m9",   "e3m1",   "e3m3",	"e3m3",
-				     "e3m4",   "e3m5",	 "e3m6",   "e3m7",   "e3m8",	"e3m9",
-				     "dphoof", "bfgga0", "heada1", "cybra1", "spida1d1" };
+		char name[][9] = { "e2m1",   "e2m2",   "e2m3",	 "e2m4",   "e2m5",    "e2m6",
+				   "e2m7",   "e2m8",   "e2m9",	 "e3m1",   "e3m3",    "e3m3",
+				   "e3m4",   "e3m5",   "e3m6",	 "e3m7",   "e3m8",    "e3m9",
+				   "dphoof", "bfgga0", "heada1", "cybra1", "spida1d1" };
 		int  i;
 
 		if (gamemode == shareware)

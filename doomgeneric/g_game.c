@@ -797,8 +797,8 @@ void G_Ticker(void)
 
 			if ((gametic & 31) == 0 && ((gametic >> 5) % MAXPLAYERS) == i &&
 			    turbodetected[i]) {
-				static char  turbomessage[80];
-				extern char *player_names[4];
+				static char	   turbomessage[80];
+				extern const char *player_names[4];
 				M_snprintf(turbomessage, sizeof(turbomessage), "%s is turbo!",
 					   player_names[i]);
 				players[consoleplayer].message = turbomessage;
@@ -1311,6 +1311,7 @@ void G_WorldDone(void)
 		case 31:
 			if (!secretexit)
 				break;
+			[[fallthrough]];
 		case 6:
 		case 11:
 		case 20:
@@ -1791,6 +1792,7 @@ int G_VanillaVersionCode(void)
 	switch (gameversion) {
 	case exe_doom_1_2:
 		I_Error("Doom 1.2 does not have a version code!");
+		[[fallthrough]];
 	case exe_doom_1_666:
 		return 106;
 	case exe_doom_1_7:
@@ -1856,7 +1858,7 @@ void G_DeferedPlayDemo(char *name)
 
 // Generate a string describing a demo version
 
-static char *DemoVersionDescription(int version)
+static const char *DemoVersionDescription(int version)
 {
 	static char resultbuf[16];
 
@@ -1906,14 +1908,14 @@ void G_DoPlayDemo(void)
 		// demo recorded with cph's modified "v1.91" doom exe
 		longtics = true;
 	} else {
-		char *message = "Demo is from a different game version!\n"
-				"(read %i, should be %i)\n"
-				"\n"
-				"*** You may need to upgrade your version "
-				"of Doom to v1.9. ***\n"
-				"    See: https://www.doomworld.com/classicdoom"
-				"/info/patches.php\n"
-				"    This appears to be %s.";
+		const char *message = "Demo is from a different game version!\n"
+				      "(read %i, should be %i)\n"
+				      "\n"
+				      "*** You may need to upgrade your version "
+				      "of Doom to v1.9. ***\n"
+				      "    See: https://www.doomworld.com/classicdoom"
+				      "/info/patches.php\n"
+				      "    This appears to be %s.";
 
 		//I_Error(message, demoversion, G_VanillaVersionCode(),
 		printf(message, demoversion, G_VanillaVersionCode(),
