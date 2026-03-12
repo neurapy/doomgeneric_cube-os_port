@@ -24,6 +24,7 @@
 #include "r_local.h"
 #include "w_wad.h"
 #include "z_zone.h"
+#include <config.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -826,6 +827,7 @@ void	     R_DrawSprite(vissprite_t *spr)
 //
 void R_DrawMasked(void)
 {
+	PERF_USCOPE();
 	vissprite_t *spr;
 	drawseg_t   *ds;
 

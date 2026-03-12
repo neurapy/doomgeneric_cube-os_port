@@ -25,6 +25,7 @@
 #include "r_sky.h"
 #include "w_wad.h"
 #include "z_zone.h"
+#include <config.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -298,6 +299,7 @@ void R_MakeSpans(int x, int t1, int b1, int t2, int b2)
 //
 void R_DrawPlanes(void)
 {
+	PERF_USCOPE();
 	visplane_t *pl;
 	int	    light;
 	int	    x;

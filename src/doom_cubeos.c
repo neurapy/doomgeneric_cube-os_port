@@ -284,6 +284,16 @@ static void doom_pump_window_messages(void)
 	}
 }
 
+static void doom_copy_framebuffer(void)
+{
+	PERF_USCOPE();
+	if (!g_doom.surface || !DG_ScreenBuffer)
+		return;
+
+	memcpy(g_doom.surface, DG_ScreenBuffer,
+	       DOOMGENERIC_RESX * DOOMGENERIC_RESY * sizeof(uint32_t));
+}
+
 static void doom_present(void)
 {
 	PERF_USCOPE();
@@ -363,13 +373,7 @@ void DG_Init(void)
 
 void DG_DrawFrame(void)
 {
-	PERF_USCOPE();
-	if (!g_doom.surface || !DG_ScreenBuffer)
-		return;
-
-	memcpy(g_doom.surface, DG_ScreenBuffer,
-	       DOOMGENERIC_RESX * DOOMGENERIC_RESY * sizeof(uint32_t));
-
+	doom_copy_framebuffer();
 	doom_present();
 	doom_pump_window_messages();
 }
@@ -411,8 +415,8 @@ void main(void *args)
 	memset(&g_doom, 0, sizeof(g_doom));
 	doom_build_argv((const char *)args);
 
-	doomgeneric_Create(g_doom.argc, g_doom.argv);
 	PERF_UINIT();
+	doomgeneric_Create(g_doom.argc, g_doom.argv);
 
 	while (!g_doom.close_requested) {
 		doom_pump_window_messages();

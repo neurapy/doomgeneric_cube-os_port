@@ -9,13 +9,10 @@ APP_IMAGE := $(BUILD_DIR)/$(APP_NAME).ELF
 OBJ_DIR := $(BUILD_DIR)/obj
 BUILD_CONFIG := $(BUILD_DIR)/.build-config
 LEGACY_BUILD_DIR := $(abspath $(CURDIR)/build)
-DOOM_WINDOW_RESX ?= 960
-DOOM_WINDOW_RESY ?= 600
 
 CC := $(PREFIX)/bin/arm-none-eabi-gcc
 
-CPPFLAGS += -I$(ROOT_DIR)/cube-os/include -I$(CURDIR)/doomgeneric -I$(ROOT_DIR)/lib/include $(EXTRA_CPPFLAGS) -DCUBEOS \
-	-DDOOMGENERIC_RESX=$(DOOM_WINDOW_RESX) -DDOOMGENERIC_RESY=$(DOOM_WINDOW_RESY)
+CPPFLAGS += -I$(ROOT_DIR)/cube-os/include -I$(CURDIR)/doomgeneric -I$(ROOT_DIR)/lib/include $(EXTRA_CPPFLAGS) -DCUBEOS 
 ARCH_FLAGS := -mcpu=cortex-a7 -mfloat-abi=soft -mno-unaligned-access
 BASE_CFLAGS := $(OPT_LEVEL) -ggdb -ffreestanding -ffunction-sections \
 	-fdata-sections -fno-unwind-tables -fno-asynchronous-unwind-tables $(ARCH_FLAGS) \

@@ -19,6 +19,7 @@
 #define __SHA1_H__
 
 #include "doomtype.h"
+#include <stddef.h>
 
 typedef struct sha1_context_s sha1_context_t;
 typedef byte		      sha1_digest_t[20];

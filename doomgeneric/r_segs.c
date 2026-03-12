@@ -21,6 +21,7 @@
 #include "i_system.h"
 #include "r_local.h"
 #include "r_sky.h"
+#include <config.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -172,6 +173,7 @@ void R_RenderMaskedSegRange(drawseg_t *ds, int x1, int x2)
 
 void R_RenderSegLoop(void)
 {
+	PERF_USCOPE();
 	angle_t	 angle;
 	unsigned index;
 	int	 yl;

@@ -67,11 +67,9 @@ typedef bool boolean;
 
 #else
 
-typedef enum {
-	false = 0,
-	true  = 1,
-	undef = 0xFFFFFFFF
-} boolean;
+#include <stdbool.h>
+
+typedef bool boolean;
 
 #endif
 

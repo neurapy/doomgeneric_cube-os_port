@@ -21,6 +21,7 @@
 
 #include "v_video.h"
 
+#include <config.h>
 #include "config.h"
 #include "deh_str.h"
 #include "doomtype.h"
@@ -79,6 +80,7 @@ void V_MarkRect(int x, int y, int width, int height)
 //
 void V_CopyRect(int srcx, int srcy, byte *source, int width, int height, int destx, int desty)
 {
+	PERF_USCOPE();
 	byte *src;
 	byte *dest;
 
@@ -124,6 +126,7 @@ void V_SetPatchClipCallback(vpatchclipfunc_t func)
 
 void V_DrawPatch(int x, int y, patch_t *patch)
 {
+	PERF_USCOPE();
 	int	  count;
 	int	  col;
 	column_t *column;
@@ -182,6 +185,7 @@ void V_DrawPatch(int x, int y, patch_t *patch)
 
 void V_DrawPatchFlipped(int x, int y, patch_t *patch)
 {
+	PERF_USCOPE();
 	int	  count;
 	int	  col;
 	column_t *column;
@@ -249,6 +253,7 @@ void V_DrawPatchDirect(int x, int y, patch_t *patch)
 
 void V_DrawTLPatch(int x, int y, patch_t *patch)
 {
+	PERF_USCOPE();
 	int	  count, col;
 	column_t *column;
 	byte	 *desttop, *dest, *source;
@@ -293,6 +298,7 @@ void V_DrawTLPatch(int x, int y, patch_t *patch)
 
 void V_DrawXlaPatch(int x, int y, patch_t *patch)
 {
+	PERF_USCOPE();
 	int	  count, col;
 	column_t *column;
 	byte	 *desttop, *dest, *source;
@@ -338,6 +344,7 @@ void V_DrawXlaPatch(int x, int y, patch_t *patch)
 
 void V_DrawAltTLPatch(int x, int y, patch_t *patch)
 {
+	PERF_USCOPE();
 	int	  count, col;
 	column_t *column;
 	byte	 *desttop, *dest, *source;
@@ -382,6 +389,7 @@ void V_DrawAltTLPatch(int x, int y, patch_t *patch)
 
 void V_DrawShadowedPatch(int x, int y, patch_t *patch)
 {
+	PERF_USCOPE();
 	int	  count, col;
 	column_t *column;
 	byte	 *desttop, *dest, *source;
@@ -450,6 +458,7 @@ void V_LoadXlaTable(void)
 
 void V_DrawBlock(int x, int y, int width, int height, byte *src)
 {
+	PERF_USCOPE();
 	byte *dest;
 
 #ifdef RANGECHECK
