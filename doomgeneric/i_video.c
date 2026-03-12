@@ -256,7 +256,7 @@ void I_InitGraphics(void)
 	if (gfxmodeparm) {
 		mode = myargv[gfxmodeparm + 1];
 	} else if (have_native_format && native_depth == 32) {
-		mode = native_pixel_order == 1u ? "rgba8888" : "bgra8888";
+		mode = native_pixel_order == 1u ? "bgra8888" : "rgba8888";
 	} else {
 		mode = "rgba8888";
 	}
