@@ -31,10 +31,13 @@
 #include "net_io.h"
 #include "net_loop.h"
 #include "net_query.h"
-#include "net_sdl.h"
 #include "net_server.h"
 #include <stdlib.h>
 #include <string.h>
+
+#ifdef FEATURE_MULTIPLAYER
+extern net_module_t net_sdl_module;
+#endif
 
 // The complete set of data for a particular tic.
 
