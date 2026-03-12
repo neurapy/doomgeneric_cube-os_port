@@ -15,6 +15,7 @@
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/types.h>
 
 //#define CMAP256
@@ -97,29 +98,62 @@ static uint32_t fb32_palette[256];
 
 static void cmap_to_fb(uint8_t *out, const uint8_t *in, int in_pixels)
 {
-	int i, k;
+	if (s_Fb.bits_per_pixel == 16) {
+		uint16_t *out16 = (uint16_t *)out;
 
-	for (i = 0; i < in_pixels; i++) {
-		if (s_Fb.bits_per_pixel == 16) {
-			uint16_t p = fb16_palette[*in];
-			for (k = 0; k < fb_scaling; k++) {
-				*(uint16_t *)out = p;
-				out += 2;
-			}
-		} else if (s_Fb.bits_per_pixel == 32) {
-			uint32_t pix = fb32_palette[*in];
-			for (k = 0; k < fb_scaling; k++) {
-				*(uint32_t *)out = pix;
-				out += 4;
-			}
-		} else {
-			// no clue how to convert this
-			I_Error("No idea how to convert %lu bpp pixels",
-				(unsigned long)s_Fb.bits_per_pixel);
+		if (fb_scaling == 1) {
+			for (int i = 0; i < in_pixels; i++)
+				out16[i] = fb16_palette[in[i]];
+			return;
 		}
 
-		in++;
+		if (fb_scaling == 2) {
+			for (int i = 0; i < in_pixels; i++) {
+				uint16_t pix = fb16_palette[in[i]];
+				out16[0]     = pix;
+				out16[1]     = pix;
+				out16 += 2;
+			}
+			return;
+		}
+
+		for (int i = 0; i < in_pixels; i++) {
+			uint16_t pix = fb16_palette[in[i]];
+			for (int k = 0; k < fb_scaling; k++)
+				*out16++ = pix;
+		}
+		return;
 	}
+
+	if (s_Fb.bits_per_pixel == 32) {
+		uint32_t *out32 = (uint32_t *)out;
+
+		if (fb_scaling == 1) {
+			for (int i = 0; i < in_pixels; i++)
+				out32[i] = fb32_palette[in[i]];
+			return;
+		}
+
+		if (fb_scaling == 2) {
+			for (int i = 0; i < in_pixels; i++) {
+				uint32_t pix = fb32_palette[in[i]];
+				out32[0]     = pix;
+				out32[1]     = pix;
+				out32 += 2;
+			}
+			return;
+		}
+
+		for (int i = 0; i < in_pixels; i++) {
+			uint32_t pix = fb32_palette[in[i]];
+			for (int k = 0; k < fb_scaling; k++)
+				*out32++ = pix;
+		}
+		return;
+	}
+
+	// no clue how to convert this
+	I_Error("No idea how to convert %lu bpp pixels", (unsigned long)s_Fb.bits_per_pixel);
 }
 
 static void I_ConvertFrameBuffer(void)
@@ -140,6 +174,18 @@ static void I_ConvertFrameBuffer(void)
 	/* DRAW SCREEN */
 	line_in	 = (unsigned char *)I_VideoBuffer;
 	line_out = (unsigned char *)DG_ScreenBuffer;
+
+	if (s_Fb.bits_per_pixel != 8 && fb_scaling == 2 && x_offset == 0 && x_offset_end == 0) {
+		size_t row_bytes = (size_t)s_Fb.xres * bytes_per_pixel;
+
+		for (y = 0; y < SCREENHEIGHT; y++) {
+			cmap_to_fb(line_out, line_in, SCREENWIDTH);
+			memcpy(line_out + row_bytes, line_out, row_bytes);
+			line_out += row_bytes * 2u;
+			line_in += SCREENWIDTH;
+		}
+		return;
+	}
 
 	y = SCREENHEIGHT;
 
