@@ -398,7 +398,7 @@ void AM_initVariables(void)
 {
 	int	       pnum;
 	static event_t st_notify = {
-		.type = ev_keyup,
+		.type  = ev_keyup,
 		.data1 = AM_MSGENTERED,
 	};
 
@@ -505,7 +505,7 @@ void AM_LevelInit(void)
 void AM_Stop(void)
 {
 	static event_t st_notify = {
-		.type = ev_keyup,
+		.type  = ev_keyup,
 		.data1 = AM_MSGEXITED,
 	};
 

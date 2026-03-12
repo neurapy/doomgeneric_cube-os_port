@@ -27,10 +27,10 @@ static wad_file_t *W_CubeOS_OpenFile(char *path)
 	}
 
 	cubeos_wad_file_t *result = Z_Malloc(sizeof(*result), PU_STATIC, 0);
-	result->wad.file_class    = &stdc_wad_file;
-	result->wad.mapped	      = NULL;
-	result->wad.length	      = (unsigned int)st.st_size;
-	result->fd		      = fd;
+	result->wad.file_class	  = &stdc_wad_file;
+	result->wad.mapped	  = NULL;
+	result->wad.length	  = (unsigned int)st.st_size;
+	result->fd		  = fd;
 
 	return &result->wad;
 }
@@ -46,8 +46,8 @@ static void W_CubeOS_CloseFile(wad_file_t *wad)
 static size_t W_CubeOS_Read(wad_file_t *wad, unsigned int offset, void *buffer, size_t buffer_len)
 {
 	cubeos_wad_file_t *cubeos_wad = (cubeos_wad_file_t *)wad;
-	uint8_t		  *out	       = (uint8_t *)buffer;
-	size_t		   total_read   = 0;
+	uint8_t		  *out	      = (uint8_t *)buffer;
+	size_t		   total_read = 0;
 
 	if (lseek(cubeos_wad->fd, (off_t)offset, SEEK_SET) < 0) {
 		return 0;

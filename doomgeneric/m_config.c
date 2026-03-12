@@ -1964,12 +1964,12 @@ void M_LoadDefaults(void)
 
 	i = M_CheckParmWithArgs("-config", 1);
 
-		if (i) {
-			doom_defaults.filename = myargv[i + 1];
-			printf("	default file: %s\n", doom_defaults.filename);
-		} else {
-			doom_defaults.filename = GetDefaultConfigPath(default_main_config);
-		}
+	if (i) {
+		doom_defaults.filename = myargv[i + 1];
+		printf("	default file: %s\n", doom_defaults.filename);
+	} else {
+		doom_defaults.filename = GetDefaultConfigPath(default_main_config);
+	}
 
 	printf("saving config in %s\n", doom_defaults.filename);
 
@@ -1982,12 +1982,12 @@ void M_LoadDefaults(void)
 
 	i = M_CheckParmWithArgs("-extraconfig", 1);
 
-		if (i) {
-			extra_defaults.filename = myargv[i + 1];
-			printf("        extra configuration file: %s\n", extra_defaults.filename);
-		} else {
-			extra_defaults.filename = GetDefaultConfigPath(default_extra_config);
-		}
+	if (i) {
+		extra_defaults.filename = myargv[i + 1];
+		printf("        extra configuration file: %s\n", extra_defaults.filename);
+	} else {
+		extra_defaults.filename = GetDefaultConfigPath(default_extra_config);
+	}
 
 	LoadDefaultCollection(&doom_defaults);
 	LoadDefaultCollection(&extra_defaults);
@@ -2175,18 +2175,18 @@ char *M_GetSaveGameDir(char *iwadname)
 		free(topdir);
 #else
 #ifdef CUBEOS
-			char *savegame_root = M_StringJoin(configdir, DIR_SEPARATOR_S, "savegame", NULL);
+		char *savegame_root = M_StringJoin(configdir, DIR_SEPARATOR_S, "savegame", NULL);
 
-			M_MakeDirectory(savegame_root);
-			savegamedir = M_StringJoin(savegame_root, DIR_SEPARATOR_S, NULL);
-			free(savegame_root);
+		M_MakeDirectory(savegame_root);
+		savegamedir = M_StringJoin(savegame_root, DIR_SEPARATOR_S, NULL);
+		free(savegame_root);
 #else
-			savegamedir = M_StringJoin(configdir, DIR_SEPARATOR_S, ".savegame/", NULL);
+		savegamedir = M_StringJoin(configdir, DIR_SEPARATOR_S, ".savegame/", NULL);
 
-			M_MakeDirectory(savegamedir);
+		M_MakeDirectory(savegamedir);
 #endif
 
-			printf("Using %s for savegames\n", savegamedir);
+		printf("Using %s for savegames\n", savegamedir);
 #endif
 	}
 

@@ -21,7 +21,6 @@
 
 #include "v_video.h"
 
-#include <config.h>
 #include "config.h"
 #include "deh_str.h"
 #include "doomtype.h"
@@ -32,6 +31,7 @@
 #include "m_misc.h"
 #include "w_wad.h"
 #include "z_zone.h"
+#include <config.h>
 #include <math.h>
 #include <stdio.h>
 #include <string.h>

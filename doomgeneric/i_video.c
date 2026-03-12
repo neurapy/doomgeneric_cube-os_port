@@ -26,7 +26,6 @@ static const char rcsid[] = "$Id: i_x.c,v 1.6 1997/02/03 22:45:10 b1 Exp $";
 
 #include "i_video.h"
 
-#include <config.h>
 #include "config.h"
 #include "d_event.h"
 #include "d_main.h"
@@ -37,6 +36,7 @@ static const char rcsid[] = "$Id: i_x.c,v 1.6 1997/02/03 22:45:10 b1 Exp $";
 #include "tables.h"
 #include "v_video.h"
 #include "z_zone.h"
+#include <config.h>
 #include <fcntl.h>
 #include <stdarg.h>
 #include <stdbool.h>
@@ -194,8 +194,7 @@ static void I_ConvertFrameBuffer(void)
 	/* 600 = s_Fb heigt, 200 screenheight */
 	/* 2048 =s_Fb width, 320 screenwidth */
 	y_offset = (((s_Fb.yres - (SCREENHEIGHT * fb_scaling)) * s_Fb.bits_per_pixel / 8)) / 2;
-	x_offset =
-		(((s_Fb.xres - (SCREENWIDTH * fb_scaling)) * s_Fb.bits_per_pixel / 8)) / 2;
+	x_offset = (((s_Fb.xres - (SCREENWIDTH * fb_scaling)) * s_Fb.bits_per_pixel / 8)) / 2;
 	x_offset_end =
 		((s_Fb.xres - (SCREENWIDTH * fb_scaling)) * s_Fb.bits_per_pixel / 8) - x_offset;
 
