@@ -62,6 +62,14 @@ static int     num_iwad_dirs = 0;
 
 static void AddIWADDir(char *dir)
 {
+	int i;
+
+	for (i = 0; i < num_iwad_dirs; ++i) {
+		if (!strcmp(iwad_dirs[i], dir)) {
+			return;
+		}
+	}
+
 	if (num_iwad_dirs < MAX_IWAD_DIRS) {
 		iwad_dirs[num_iwad_dirs] = dir;
 		++num_iwad_dirs;
@@ -566,7 +574,14 @@ static void BuildIWADDirList(void)
 
 #endif
 #else
+	// CubeOS stages IWADs under /assets on the FAT volume, while the
+	// process cwd defaults to the filesystem root.
+	AddIWADDir(".");
 	AddIWADDir(FILES_DIR);
+#ifdef CUBEOS
+	AddIWADDir("assets");
+	AddIWADDir("/assets");
+#endif
 
 	// Don't run this function again.
 
