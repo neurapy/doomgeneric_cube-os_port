@@ -26,8 +26,7 @@ BASE_CFLAGS := $(OPT_LEVEL) -ggdb -ffreestanding -ffunction-sections \
 USER_PROFILER_CFLAGS :=
 ifeq ($(USER_PERF_ENABLED),1)
 USER_PROFILER_CFLAGS += \
-	-finstrument-functions \
-	-finstrument-functions-exclude-file-list=runtime/perf.c,runtime/crt0.c
+	-finstrument-functions 
 endif
 CFLAGS += $(BASE_CFLAGS)
 EXTRA_WARNINGS ?=
