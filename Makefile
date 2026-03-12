@@ -100,13 +100,13 @@ DOOMGENERIC_SRCS := \
 	$(CURDIR)/doomgeneric/w_main.c \
 	$(CURDIR)/doomgeneric/w_wad.c \
 	$(CURDIR)/doomgeneric/z_zone.c \
-	$(CURDIR)/doomgeneric/w_file_stdc.c \
 	$(CURDIR)/doomgeneric/i_input.c \
 	$(CURDIR)/doomgeneric/i_video.c \
 	$(CURDIR)/doomgeneric/doomgeneric.c
 
 PORT_C_SRCS := \
 	$(CURDIR)/src/doom_cubeos.c \
+	$(CURDIR)/src/w_file_cubeos.c \
 	$(CURDIR)/src/newlib_stubs.c \
 	$(ROOT_DIR)/lib/runtime/crt0.c \
 	$(ROOT_DIR)/lib/runtime/perf.c

@@ -61,15 +61,15 @@
 
 #ifdef __cplusplus
 
-// Use builtin bool type with C++.
-
-typedef bool boolean;
+typedef int boolean;
 
 #else
 
 #include <stdbool.h>
 
-typedef bool boolean;
+// Doom stores sentinel values like -1 in some "boolean" fields.
+// Keep this as an int instead of C99 _Bool so those code paths work.
+typedef int boolean;
 
 #endif
 

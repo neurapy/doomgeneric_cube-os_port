@@ -44,6 +44,7 @@ char *configdir;
 
 static char *default_main_config;
 static char *default_extra_config;
+static char *GetDefaultConfigPath(char *filename);
 
 typedef enum {
 	DEFAULT_INT,
@@ -1963,12 +1964,12 @@ void M_LoadDefaults(void)
 
 	i = M_CheckParmWithArgs("-config", 1);
 
-	if (i) {
-		doom_defaults.filename = myargv[i + 1];
-		printf("	default file: %s\n", doom_defaults.filename);
-	} else {
-		doom_defaults.filename = M_StringJoin(configdir, default_main_config, NULL);
-	}
+		if (i) {
+			doom_defaults.filename = myargv[i + 1];
+			printf("	default file: %s\n", doom_defaults.filename);
+		} else {
+			doom_defaults.filename = GetDefaultConfigPath(default_main_config);
+		}
 
 	printf("saving config in %s\n", doom_defaults.filename);
 
@@ -1981,12 +1982,12 @@ void M_LoadDefaults(void)
 
 	i = M_CheckParmWithArgs("-extraconfig", 1);
 
-	if (i) {
-		extra_defaults.filename = myargv[i + 1];
-		printf("        extra configuration file: %s\n", extra_defaults.filename);
-	} else {
-		extra_defaults.filename = M_StringJoin(configdir, default_extra_config, NULL);
-	}
+		if (i) {
+			extra_defaults.filename = myargv[i + 1];
+			printf("        extra configuration file: %s\n", extra_defaults.filename);
+		} else {
+			extra_defaults.filename = GetDefaultConfigPath(default_extra_config);
+		}
 
 	LoadDefaultCollection(&doom_defaults);
 	LoadDefaultCollection(&extra_defaults);
@@ -2094,11 +2095,24 @@ float M_GetFloatVariable(char *name)
 
 static char *GetDefaultConfigDir(void)
 {
+#ifdef CUBEOS
+	return strdup("doomdata");
+#else
 	char *result = (char *)malloc(2);
 	result[0]    = '.';
 	result[1]    = '\0';
 
 	return result;
+#endif
+}
+
+static char *GetDefaultConfigPath(char *filename)
+{
+#ifdef CUBEOS
+	return M_StringJoin(configdir, DIR_SEPARATOR_S, filename, NULL);
+#else
+	return M_StringJoin(configdir, filename, NULL);
+#endif
 }
 
 //
@@ -2160,11 +2174,19 @@ char *M_GetSaveGameDir(char *iwadname)
 
 		free(topdir);
 #else
-		savegamedir = M_StringJoin(configdir, DIR_SEPARATOR_S, ".savegame/", NULL);
+#ifdef CUBEOS
+			char *savegame_root = M_StringJoin(configdir, DIR_SEPARATOR_S, "savegame", NULL);
 
-		M_MakeDirectory(savegamedir);
+			M_MakeDirectory(savegame_root);
+			savegamedir = M_StringJoin(savegame_root, DIR_SEPARATOR_S, NULL);
+			free(savegame_root);
+#else
+			savegamedir = M_StringJoin(configdir, DIR_SEPARATOR_S, ".savegame/", NULL);
 
-		printf("Using %s for savegames\n", savegamedir);
+			M_MakeDirectory(savegamedir);
+#endif
+
+			printf("Using %s for savegames\n", savegamedir);
 #endif
 	}
 
