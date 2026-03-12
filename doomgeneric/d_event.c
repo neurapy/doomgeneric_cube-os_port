@@ -19,45 +19,43 @@
 // Events can be discarded if no responder claims them
 //
 
-#include <stdlib.h>
 #include "d_event.h"
+
+#include <stdlib.h>
 
 #define MAXEVENTS 64
 
 static event_t events[MAXEVENTS];
-static int eventhead;
-static int eventtail;
+static int     eventhead;
+static int     eventtail;
 
 //
 // D_PostEvent
 // Called by the I/O functions when input is detected
 //
-void D_PostEvent (event_t* ev)
+void D_PostEvent(event_t *ev)
 {
-    events[eventhead] = *ev;
-    eventhead = (eventhead + 1) % MAXEVENTS;
+	events[eventhead] = *ev;
+	eventhead	  = (eventhead + 1) % MAXEVENTS;
 }
 
 // Read an event from the queue.
 
 event_t *D_PopEvent(void)
 {
-    event_t *result;
+	event_t *result;
 
-    // No more events waiting.
+	// No more events waiting.
 
-    if (eventtail == eventhead)
-    {
-        return NULL;
-    }
-    
-    result = &events[eventtail];
+	if (eventtail == eventhead) {
+		return NULL;
+	}
 
-    // Advance to the next event in the queue.
+	result = &events[eventtail];
 
-    eventtail = (eventtail + 1) % MAXEVENTS;
+	// Advance to the next event in the queue.
 
-    return result;
+	eventtail = (eventtail + 1) % MAXEVENTS;
+
+	return result;
 }
-
-
