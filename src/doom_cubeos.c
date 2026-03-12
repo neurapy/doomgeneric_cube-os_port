@@ -1,7 +1,6 @@
 #include "config.h"
 #include "doomgeneric.h"
 #include "doomkeys.h"
-#include "runtime/perf.h"
 #include <abi/syscalls.h>
 #include <ctype.h>
 #include <stdbool.h>
