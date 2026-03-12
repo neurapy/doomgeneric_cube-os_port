@@ -98,3 +98,6 @@
 
 /* Define to the directory where all game files are located */
 #define FILES_DIR "."
+
+/* Default framebuffer format for the CubeOS Doom port. */
+#define CUBEOS_DEFAULT_GFXMODE "bgra8888"

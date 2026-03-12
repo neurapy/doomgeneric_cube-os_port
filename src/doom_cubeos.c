@@ -409,18 +409,6 @@ void DG_SetWindowTitle(const char *title)
 	(void)title;
 }
 
-int DG_GetNativePixelFormat(uint32_t *depth, uint32_t *pixel_order)
-{
-	if (g_doom.channel.handle == 0)
-		return 0;
-
-	if (depth)
-		*depth = g_doom.channel.depth;
-	if (pixel_order)
-		*pixel_order = g_doom.channel.pixel_order;
-	return 1;
-}
-
 void main(void *args)
 {
 	memset(&g_doom, 0, sizeof(g_doom));

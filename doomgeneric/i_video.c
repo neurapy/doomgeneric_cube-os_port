@@ -96,21 +96,6 @@ static uint16_t rgb565_palette[256];
 static uint16_t fb16_palette[256];
 static uint32_t fb32_palette[256];
 
-static void I_SetFbFormat32(uint32_t red_offset, uint32_t green_offset, uint32_t blue_offset)
-{
-	s_Fb.bits_per_pixel = 32;
-
-	s_Fb.blue.length   = 8;
-	s_Fb.green.length  = 8;
-	s_Fb.red.length	   = 8;
-	s_Fb.transp.length = 8;
-
-	s_Fb.red.offset	   = red_offset;
-	s_Fb.green.offset  = green_offset;
-	s_Fb.blue.offset   = blue_offset;
-	s_Fb.transp.offset = 24;
-}
-
 static void cmap_to_fb(uint8_t *out, const uint8_t *in, int in_pixels)
 {
 	if (s_Fb.bits_per_pixel == 16) {
@@ -234,10 +219,6 @@ void I_InitGraphics(void)
 {
 	int   i, gfxmodeparm;
 	char *mode;
-	uint32_t native_depth	     = 0;
-	uint32_t native_pixel_order = 0;
-	int	  have_native_format =
-		DG_GetNativePixelFormat(&native_depth, &native_pixel_order);
 
 	memset(&s_Fb, 0, sizeof(struct FB_ScreenInfo));
 	s_Fb.xres	  = DOOMGENERIC_RESX;
@@ -255,16 +236,35 @@ void I_InitGraphics(void)
 
 	if (gfxmodeparm) {
 		mode = myargv[gfxmodeparm + 1];
-	} else if (have_native_format && native_depth == 32) {
-		mode = native_pixel_order == 1u ? "bgra8888" : "rgba8888";
 	} else {
-		mode = "rgba8888";
+		mode = CUBEOS_DEFAULT_GFXMODE;
 	}
 
 	if (strcmp(mode, "rgba8888") == 0) {
-		I_SetFbFormat32(16, 8, 0);
+		// default mode
+		s_Fb.bits_per_pixel = 32;
+
+		s_Fb.blue.length   = 8;
+		s_Fb.green.length  = 8;
+		s_Fb.red.length	   = 8;
+		s_Fb.transp.length = 8;
+
+		s_Fb.blue.offset   = 0;
+		s_Fb.green.offset  = 8;
+		s_Fb.red.offset	   = 16;
+		s_Fb.transp.offset = 24;
 	} else if (strcmp(mode, "bgra8888") == 0) {
-		I_SetFbFormat32(0, 8, 16);
+		s_Fb.bits_per_pixel = 32;
+
+		s_Fb.blue.length   = 8;
+		s_Fb.green.length  = 8;
+		s_Fb.red.length	   = 8;
+		s_Fb.transp.length = 8;
+
+		s_Fb.blue.offset   = 16;
+		s_Fb.green.offset  = 8;
+		s_Fb.red.offset	   = 0;
+		s_Fb.transp.offset = 24;
 	} else if (strcmp(mode, "rgb565") == 0) {
 		s_Fb.bits_per_pixel = 16;
 
@@ -273,9 +273,9 @@ void I_InitGraphics(void)
 		s_Fb.red.length	   = 5;
 		s_Fb.transp.length = 0;
 
-		s_Fb.blue.offset   = 0;
+		s_Fb.blue.offset   = 11;
 		s_Fb.green.offset  = 5;
-		s_Fb.red.offset	   = 11;
+		s_Fb.red.offset	   = 0;
 		s_Fb.transp.offset = 16;
 	} else
 		I_Error("Unknown gfxmode value: %s\n", mode);
