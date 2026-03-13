@@ -19,8 +19,8 @@ void doomgeneric_Create(int argc, char **argv)
 
 	DG_Init();
 	if (DG_ScreenBuffer == NULL) {
-		DG_ScreenBuffer = malloc(DOOMGENERIC_RESX * DOOMGENERIC_RESY *
-					 sizeof(*DG_ScreenBuffer));
+		DG_ScreenBuffer =
+			malloc(DOOMGENERIC_RESX * DOOMGENERIC_RESY * sizeof(*DG_ScreenBuffer));
 		if (DG_ScreenBuffer == NULL) {
 			fprintf(stderr, "doomgeneric_Create: failed to allocate screen buffer\n");
 			exit(1);

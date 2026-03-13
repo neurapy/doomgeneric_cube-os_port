@@ -373,13 +373,14 @@ void DG_SleepMs(uint32_t ms)
 {
 	uint32_t deadline = syscall_time_us() + ms * 1000u;
 
-	while ((int32_t)(deadline - syscall_time_us()) > 0) {
+	while (true) {
 		uint32_t now	      = syscall_time_us();
-		uint32_t remaining_us = deadline - now;
-		uint32_t sleep_ticks  = remaining_us / 5000u;
-		if (sleep_ticks == 0)
-			sleep_ticks =
-				1; // Hier vlt 0 zulassen. und daraus quasi eine busy loop machen
+		int32_t	 remaining_us = (int32_t)(deadline - now);
+		if (remaining_us <= 0)
+			break;
+
+		uint32_t sleep_ticks =
+			((uint32_t)remaining_us + TICK_INTERVAL_US - 1u) / TICK_INTERVAL_US;
 		syscall_sleep(sleep_ticks);
 	}
 }
