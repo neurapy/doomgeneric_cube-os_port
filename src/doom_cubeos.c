@@ -283,16 +283,6 @@ static void doom_pump_window_messages(void)
 	}
 }
 
-static void doom_copy_framebuffer(void)
-{
-	PERF_USCOPE();
-	if (!g_doom.surface || !DG_ScreenBuffer)
-		return;
-
-	memcpy(g_doom.surface, DG_ScreenBuffer,
-	       DOOMGENERIC_RESX * DOOMGENERIC_RESY * sizeof(uint32_t));
-}
-
 static void doom_present(void)
 {
 	PERF_USCOPE();
@@ -318,6 +308,9 @@ static void doom_open_window(void)
 	g_doom.surface = (uint32_t *)(uintptr_t)g_doom.channel.buffer;
 	if (!g_doom.surface)
 		syscall_exit();
+
+	// Convert Doom's paletted framebuffer directly into the shared surface.
+	DG_ScreenBuffer = g_doom.surface;
 }
 
 static void doom_build_argv(const char *cmdline)
@@ -372,7 +365,6 @@ void DG_Init(void)
 
 void DG_DrawFrame(void)
 {
-	doom_copy_framebuffer();
 	doom_present();
 	doom_pump_window_messages();
 }
