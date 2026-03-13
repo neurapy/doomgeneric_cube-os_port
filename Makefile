@@ -2,7 +2,7 @@ ROOT_DIR ?= $(abspath $(CURDIR)/../..)
 BUILD_BASE ?= $(ROOT_DIR)/build/apps
 BUILD_DIR ?= $(BUILD_BASE)/$(notdir $(CURDIR))
 PREFIX ?= $(HOME)/uni/Semester_3/osprakt/arm
-OPT_LEVEL ?= -O2
+OPT_LEVEL ?= -O3
 CONFIG_HEADER ?= $(ROOT_DIR)/cube-os/include/config.h
 
 APP_NAME := DOOM

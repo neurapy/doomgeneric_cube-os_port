@@ -175,13 +175,14 @@ static void I_ConvertFrameBuffer(void)
 	line_in	 = (unsigned char *)I_VideoBuffer;
 	line_out = (unsigned char *)DG_ScreenBuffer;
 
-	if (s_Fb.bits_per_pixel != 8 && fb_scaling == 2 && x_offset == 0 && x_offset_end == 0) {
+	if (s_Fb.bits_per_pixel != 8 && x_offset == 0 && x_offset_end == 0) {
 		size_t row_bytes = (size_t)s_Fb.xres * bytes_per_pixel;
 
 		for (y = 0; y < SCREENHEIGHT; y++) {
 			cmap_to_fb(line_out, line_in, SCREENWIDTH);
-			memcpy(line_out + row_bytes, line_out, row_bytes);
-			line_out += row_bytes * 2u;
+			for (unsigned int i = 1; i < fb_scaling; i++)
+				memcpy(line_out + (size_t)i * row_bytes, line_out, row_bytes);
+			line_out += row_bytes * (size_t)fb_scaling;
 			line_in += SCREENWIDTH;
 		}
 		return;
