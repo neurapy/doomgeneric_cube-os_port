@@ -1,39 +1,36 @@
 ROOT_DIR ?= $(abspath $(CURDIR)/../..)
 BUILD_BASE ?= $(ROOT_DIR)/build/apps
 BUILD_DIR ?= $(BUILD_BASE)/$(notdir $(CURDIR))
-PREFIX ?= $(HOME)/uni/Semester_3/osprakt/arm
-OPT_LEVEL ?= -O2
+NEWLIB_SYSROOT ?=
+OPT_LEVEL ?= -O3
 CONFIG_HEADER ?= $(ROOT_DIR)/cube-os/include/config.h
 
 APP_NAME := DOOM
 APP_IMAGE := $(BUILD_DIR)/$(APP_NAME).ELF
 OBJ_DIR := $(BUILD_DIR)/obj
-BUILD_CONFIG := $(BUILD_DIR)/.build-config
-LEGACY_BUILD_DIR := $(abspath $(CURDIR)/build)
 USER_PERF_ENABLED ?= $(shell if grep -Eq '^[[:space:]]*#define[[:space:]]+LOG_PERFORMANCE_USER([[:space:]]|$$)' "$(CONFIG_HEADER)"; then printf '1'; else printf '0'; fi)
 USER_PERF_RUNTIME_SRC := $(ROOT_DIR)/lib/runtime/perf.c
 
-CC := $(PREFIX)/bin/arm-none-eabi-gcc
-OBJCOPY := $(PREFIX)/bin/arm-none-eabi-objcopy
-READELF := $(PREFIX)/bin/arm-none-eabi-readelf
+CC := arm-none-eabi-gcc
+READELF := arm-none-eabi-readelf
 UPERF_SYMBOL_BLOBS_SRC := $(ROOT_DIR)/lib/runtime/perf_symbol_blobs.S
 
-CPPFLAGS += -I$(ROOT_DIR)/cube-os/include -I$(CURDIR)/doomgeneric -I$(ROOT_DIR)/lib/include $(EXTRA_CPPFLAGS) -DCUBEOS 
+GCC_DEFAULT_SYSROOT := $(strip $(shell $(CC) -print-sysroot 2>/dev/null))
+LOCAL_NEWLIB_SYSROOT := $(ROOT_DIR)/newlib/arm-none-eabi
+EFFECTIVE_NEWLIB_SYSROOT := $(firstword $(foreach dir,$(NEWLIB_SYSROOT) $(LOCAL_NEWLIB_SYSROOT) $(GCC_DEFAULT_SYSROOT),$(if $(and $(strip $(dir)),$(wildcard $(dir)/include/stdio.h),$(wildcard $(dir)/include/strings.h),$(wildcard $(dir)/lib/libc.a),$(wildcard $(dir)/lib/libm.a)),$(abspath $(dir)))))
+ifneq ($(EFFECTIVE_NEWLIB_SYSROOT),)
+SYSROOT_FLAGS := --sysroot=$(EFFECTIVE_NEWLIB_SYSROOT)
+endif
+
+CPPFLAGS += $(SYSROOT_FLAGS) -I$(ROOT_DIR)/cube-os/include -I$(CURDIR)/doomgeneric -I$(ROOT_DIR)/lib/include $(EXTRA_CPPFLAGS) -DCUBEOS
 ARCH_FLAGS := -mcpu=cortex-a7 -mfpu=neon-vfpv4 -mfloat-abi=softfp -mno-unaligned-access
 BASE_CFLAGS := $(OPT_LEVEL) -ggdb -ffreestanding -ffunction-sections \
 	-fno-builtin-memcpy -fno-builtin-memmove -fno-builtin-memset -fno-builtin-memcmp \
 	-fdata-sections -fno-unwind-tables -fno-asynchronous-unwind-tables $(ARCH_FLAGS) \
 	-Wall -Wextra -Wno-unused-parameter -Wno-sign-compare -Wno-pointer-sign
-USER_PROFILER_CFLAGS :=
-ifeq ($(USER_PERF_ENABLED),1)
-USER_PROFILER_CFLAGS += \
-	-finstrument-functions 
-endif
-CFLAGS += $(BASE_CFLAGS)
-EXTRA_WARNINGS ?=
-DOOM_CFLAGS = -std=gnu23 $(BASE_CFLAGS) $(EXTRA_WARNINGS) $(USER_PROFILER_CFLAGS)
-PORT_CFLAGS = -std=gnu23 $(BASE_CFLAGS) $(EXTRA_WARNINGS) $(USER_PROFILER_CFLAGS)
-LDFLAGS += $(ARCH_FLAGS) -nostdlib -Wl,--gc-sections -Wl,--fatal-warnings
+USER_PROFILER_CFLAGS := $(if $(filter 1,$(USER_PERF_ENABLED)),-finstrument-functions)
+CFLAGS += $(BASE_CFLAGS) $(USER_PROFILER_CFLAGS)
+LDFLAGS += $(SYSROOT_FLAGS) $(ARCH_FLAGS) -nostdlib -Wl,--gc-sections -Wl,--fatal-warnings
 LDLIBS += -lc -lm -lgcc
 
 DOOMGENERIC_SRCS := \
@@ -153,30 +150,14 @@ endif
 
 -include $(DEPS)
 
-$(BUILD_CONFIG): FORCE
-	@mkdir -p $(dir $@)
-	@{ \
-		printf 'CC=%s\n' '$(CC)'; \
-		printf 'OBJCOPY=%s\n' '$(OBJCOPY)'; \
-		printf 'READELF=%s\n' '$(READELF)'; \
-		printf 'USER_PERF_ENABLED=%s\n' '$(USER_PERF_ENABLED)'; \
-		printf 'CPPFLAGS=%s\n' '$(CPPFLAGS)'; \
-		printf 'CFLAGS=%s\n' '$(CFLAGS)'; \
-		printf 'DOOM_CFLAGS=%s\n' '$(DOOM_CFLAGS)'; \
-		printf 'PORT_CFLAGS=%s\n' '$(PORT_CFLAGS)'; \
-		printf 'LDFLAGS=%s\n' '$(LDFLAGS)'; \
-		printf 'LDLIBS=%s\n' '$(LDLIBS)'; \
-	} > $@.tmp
-	@if [ ! -f $@ ] || ! cmp -s $@.tmp $@; then mv -f $@.tmp $@; else rm -f $@.tmp; fi
-
 define register_c_rule
-$(call obj_name,$(1)): $(1) $(BUILD_CONFIG)
+$(call obj_name,$(1)): $(1)
 	@mkdir -p $$(dir $$@)
-	$(CC) $(CPPFLAGS) $(if $(filter $(1),$(PORT_C_SRCS)),$(PORT_CFLAGS),$(DOOM_CFLAGS)) -MMD -MP -MF $$(patsubst %.o,%.d,$$@) -c $$< -o $$@
+	$(CC) $(CPPFLAGS) -std=gnu23 $(CFLAGS) -MMD -MP -MF $$(patsubst %.o,%.d,$$@) -c $$< -o $$@
 endef
 
 define register_s_rule
-$(call obj_name,$(1)): $(1) $(BUILD_CONFIG)
+$(call obj_name,$(1)): $(1)
 	@mkdir -p $$(dir $$@)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -MMD -MP -MF $$(patsubst %.o,%.d,$$@) -c $$< -o $$@
 endef
@@ -185,7 +166,7 @@ $(foreach src,$(C_SRCS),$(eval $(call register_c_rule,$(src))))
 $(foreach src,$(S_SRCS),$(eval $(call register_s_rule,$(src))))
 
 ifeq ($(USER_PERF_ENABLED),1)
-$(UPERF_PRELINK_IMAGE): $(OBJS) $(BUILD_CONFIG)
+$(UPERF_PRELINK_IMAGE): $(OBJS)
 	@mkdir -p $(dir $@)
 	$(CC) -o $@ $(OBJS) $(LDFLAGS) $(LDLIBS)
 
@@ -199,24 +180,20 @@ $(UPERF_STRTAB_BIN): $(UPERF_PRELINK_IMAGE)
 	@set -- $$($(READELF) -SW $< | awk '$$2 == ".strtab" { print $$5, $$6 }'); \
 	dd if=$< of=$@ bs=1 skip=$$((16#$$1)) count=$$((16#$$2)) status=none
 
-$(UPERF_SYMBOLS_OBJ): $(UPERF_SYMBOL_BLOBS_SRC) $(UPERF_SYMTAB_BIN) $(UPERF_STRTAB_BIN) $(BUILD_CONFIG)
+$(UPERF_SYMBOLS_OBJ): $(UPERF_SYMBOL_BLOBS_SRC) $(UPERF_SYMTAB_BIN) $(UPERF_STRTAB_BIN)
 	@mkdir -p $(dir $@)
-	$(CC) $(CPPFLAGS) $(BASE_CFLAGS) -std=gnu23 \
+	$(CC) $(CPPFLAGS) -std=gnu23 $(CFLAGS) \
 		-DUSER_PERF_SYMTAB_PATH=\"$(abspath $(UPERF_SYMTAB_BIN))\" \
 		-DUSER_PERF_STRTAB_PATH=\"$(abspath $(UPERF_STRTAB_BIN))\" \
 		-MMD -MP -MF $(patsubst %.o,%.d,$@) -c $(UPERF_SYMBOL_BLOBS_SRC) -o $@
 endif
 
-$(APP_IMAGE): $(OBJS) $(APP_IMAGE_EXTRA_OBJS) $(BUILD_CONFIG)
+$(APP_IMAGE): $(OBJS) $(APP_IMAGE_EXTRA_OBJS)
 	@mkdir -p $(dir $@)
 	$(CC) -o $@ $(OBJS) $(APP_IMAGE_EXTRA_OBJS) $(LDFLAGS) $(LDLIBS)
 
-.PHONY: FORCE build clean strict
+.PHONY: build clean
 build: $(APP_IMAGE)
-
-strict: EXTRA_WARNINGS += -Werror -Wcast-qual -Wwrite-strings -Wimplicit-fallthrough=5
-strict: build
 
 clean:
 	rm -rf $(BUILD_DIR)
-	@if [ "$(abspath $(BUILD_DIR))" != "$(LEGACY_BUILD_DIR)" ]; then rm -rf "$(LEGACY_BUILD_DIR)"; fi
