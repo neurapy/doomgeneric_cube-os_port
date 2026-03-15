@@ -840,7 +840,7 @@ void G_Ticker(void)
 
 					savegameslot = (players[i].cmd.buttons & BTS_SAVEMASK) >>
 						       BTS_SAVESHIFT;
-					gameaction = ga_savegame;
+					gameaction   = ga_savegame;
 					break;
 				}
 			}

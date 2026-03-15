@@ -392,8 +392,8 @@ void I_SetPalette(byte *palette)
 		rgb565_palette[i] = GFX_RGB565(colors[i].r, colors[i].g, colors[i].b);
 		fb16_palette[i]	  = rgb565_palette[i];
 		fb32_palette[i]	  = ((uint32_t)colors[i].r << s_Fb.red.offset) |
-				  ((uint32_t)colors[i].g << s_Fb.green.offset) |
-				  ((uint32_t)colors[i].b << s_Fb.blue.offset);
+				    ((uint32_t)colors[i].g << s_Fb.green.offset) |
+				    ((uint32_t)colors[i].b << s_Fb.blue.offset);
 
 #ifdef SYS_BIG_ENDIAN
 		fb16_palette[i] = swapeLE16(fb16_palette[i]);
