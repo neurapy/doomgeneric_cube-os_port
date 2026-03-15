@@ -21,6 +21,7 @@ UPERF_SYMBOL_BLOBS_SRC := $(ROOT_DIR)/lib/runtime/perf_symbol_blobs.S
 CPPFLAGS += -I$(ROOT_DIR)/cube-os/include -I$(CURDIR)/doomgeneric -I$(ROOT_DIR)/lib/include $(EXTRA_CPPFLAGS) -DCUBEOS 
 ARCH_FLAGS := -mcpu=cortex-a7 -mfpu=neon-vfpv4 -mfloat-abi=softfp -mno-unaligned-access
 BASE_CFLAGS := $(OPT_LEVEL) -ggdb -ffreestanding -ffunction-sections \
+	-fno-builtin-memcpy -fno-builtin-memmove -fno-builtin-memset -fno-builtin-memcmp \
 	-fdata-sections -fno-unwind-tables -fno-asynchronous-unwind-tables $(ARCH_FLAGS) \
 	-Wall -Wextra -Wno-unused-parameter -Wno-sign-compare -Wno-pointer-sign
 USER_PROFILER_CFLAGS :=
@@ -117,6 +118,7 @@ DOOMGENERIC_SRCS := \
 	$(CURDIR)/doomgeneric/doomgeneric.c
 
 PORT_C_SRCS := \
+	$(ROOT_DIR)/lib/core/mem.c \
 	$(CURDIR)/src/doom_cubeos.c \
 	$(CURDIR)/src/w_file_cubeos.c \
 	$(CURDIR)/src/newlib_stubs.c \
