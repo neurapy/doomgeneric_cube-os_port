@@ -293,11 +293,8 @@ static void doom_present(void)
 		.type	  = SYS_DESKTOP_MSG_REDRAW,
 		.reserved = 0,
 	};
-	if (syscall_desktop_send(g_doom.channel.handle, &redraw) == 0) {
-		// Real hardware needs a cooperative handoff here so the compositor can
-		// drain the redraw and present it before Doom starts the next frame.
+	if (syscall_desktop_send(g_doom.channel.handle, &redraw) == 0)
 		syscall_sleep(0);
-	}
 }
 
 static void doom_open_window(void)
@@ -309,7 +306,6 @@ static void doom_open_window(void)
 	if (!g_doom.surface)
 		syscall_exit();
 
-	// Convert Doom's paletted framebuffer directly into the shared surface.
 	DG_ScreenBuffer = g_doom.surface;
 }
 
